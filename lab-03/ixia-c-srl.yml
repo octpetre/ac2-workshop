@@ -1,0 +1,13 @@
+name: ixsrl
+topology:
+  nodes:
+    ixia-c:
+      kind: keysight_ixia-c-one
+      image: ghcr.io/open-traffic-generator/ixia-c-one:1.12.0-1
+    srl:
+      kind: nokia_srlinux
+      image: ghcr.io/nokia/srlinux:latest
+      startup-config: srl.cfg
+  links:
+    - endpoints: ["ixia-c:eth1","srl:e1-1"]
+    - endpoints: ["ixia-c:eth2","srl:e1-2"]
