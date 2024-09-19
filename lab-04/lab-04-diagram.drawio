@@ -10,8 +10,8 @@
                 <mxCell id="8" value="IXIA-C-ONE" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=2;fillWeight=4;hachureGap=8;hachureAngle=45;fillColor=#dae8fc;sketch=1;strokeColor=#6c8ebf;" parent="1" vertex="1">
                     <mxGeometry x="635" y="260" width="120" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="12" value="SRL2" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=2;fillWeight=4;hachureGap=8;hachureAngle=45;fillColor=#ffe6cc;sketch=1;strokeColor=#d79b00;" parent="1" vertex="1">
-                    <mxGeometry x="330" y="210" width="120" height="60" as="geometry"/>
+                <mxCell id="12" value="SRL2&lt;br&gt;(RR)" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=2;fillWeight=4;hachureGap=8;hachureAngle=45;fillColor=#ffe6cc;sketch=1;strokeColor=#d79b00;" parent="1" vertex="1">
+                    <mxGeometry x="330" y="215" width="120" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="14" value="" style="shape=link;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="7" target="15" edge="1">
                     <mxGeometry width="100" relative="1" as="geometry">
@@ -21,7 +21,7 @@
                 </mxCell>
                 <mxCell id="26" value="eth1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="14" vertex="1" connectable="0">
                     <mxGeometry x="-0.7828" y="-1" relative="1" as="geometry">
-                        <mxPoint x="15" y="9" as="offset"/>
+                        <mxPoint x="25" y="9" as="offset"/>
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="27" value="e1-1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="14" vertex="1" connectable="0">
