@@ -5,7 +5,6 @@ import time
 
    
 def Test_ibgp_route_prefix():
-    # TODO: add support for BGP for IPv6 as well
     test_const = {
         "pktRate": 100,
         "pktCount": 6000,
@@ -23,7 +22,7 @@ def Test_ibgp_route_prefix():
         "3Ip": "192.168.33.2",
         "3Gateway": "192.168.33.1",
         "3Prefix": 24,
-        "routeCount": 10,
+        "routeCount": 5,
         "1AdvRoute": "101.10.10.1",
         "dstRoute": "201.30.30.1",
     }
@@ -49,10 +48,14 @@ def Test_ibgp_route_prefix():
         time.sleep(1)
 
     withdraw_routes(api)
+
+    time.sleep(5)
+    
+    get_bgp_prefixes(api)    
     
     wait_for(lambda: traffic_stopped(api), "traffic stopped",2,90)
 
-    get_convergence_time(api)
+    get_convergence_time(api,test_const)
 
 def ibgp_route_prefix_config(api, tc):
     c = api.config()
@@ -352,7 +355,7 @@ def withdraw_routes(api):
 def get_convergence_time(api,tc):
     mr = api.metrics_request()
     mr.flow.flow_names = ["bgpFlow"]
-    m = api.get_metrics(mr).flow_metrics
+    m = api.get_metrics(mr).flow_metrics[0]
     
     convergence = (m.frames_tx - m.frames_rx)/tc("pktRate")
     print("%s Convergence time was %i" % datetime.now(), convergence)

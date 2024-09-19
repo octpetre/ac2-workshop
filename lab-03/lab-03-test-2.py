@@ -5,7 +5,6 @@ import time
 
    
 def Test_ibgp_route_prefix():
-    # TODO: add support for BGP for IPv6 as well
     test_const = {
         "pktRate": 50,
         "pktCount": 1500,
