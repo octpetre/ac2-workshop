@@ -357,9 +357,9 @@ def get_convergence_time(api,tc):
     mr.flow.flow_names = ["bgpFlow"]
     m = api.get_metrics(mr).flow_metrics[0]
     
-    convergence = (m.frames_tx - m.frames_rx)/tc("pktRate")
-    print("%s Convergence time was %i" % datetime.now(), convergence)
-    
+    convergence = (m.frames_tx - m.frames_rx)/tc["pktRate"]
+    print("%s Convergence time was %i" % (datetime.now(), convergence))
+
 
 
 def wait_for(func, condition_str, interval_seconds=None, timeout_seconds=None):
