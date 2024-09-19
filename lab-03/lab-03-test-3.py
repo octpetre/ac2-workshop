@@ -7,7 +7,7 @@ import time
 def Test_ibgp_route_prefix():
     test_const = {
         "pktRate": 100,
-        "pktCount": 6000,
+        "pktCount": 5000,
         "pktSize": 100,
         "bgpAs": 65001,
         "1Mac": "00:00:01:01:01:01",
@@ -126,7 +126,10 @@ def ibgp_route_prefix_config(api, tc):
     d2_bgpv4_peer_rrv4.addresses.add(
         address=tc["dstRoute"], prefix=32, count=tc["routeCount"], step=1
     )
-    d2_bgpv4_peer_rrv4.advanced.local_preference = 200
+    d2_bgpv4_peer_rrv4.advanced.set(
+        local_preference = 200,
+        multi_exit_discriminator = 100
+    )
     
     d3_eth = d3.ethernets.add(name="d3_eth")
     d3_eth.connection.port_name = p3.name
@@ -158,7 +161,10 @@ def ibgp_route_prefix_config(api, tc):
     d3_bgpv4_peer_rrv4.addresses.add(
         address=tc["dstRoute"], prefix=32, count=tc["routeCount"], step=1
     )
-    d3_bgpv4_peer_rrv4.advanced.local_preference = 150
+    d3_bgpv4_peer_rrv4.advanced.set(
+        local_preference = 150,
+        multi_exit_discriminator = 200
+    )
     
     f = c.flows.add()
     f.duration.fixed_packets.packets = tc["pktCount"]
