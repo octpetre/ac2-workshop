@@ -38,15 +38,15 @@ def Traffic_Test():
     
     start_transmit(api)
     
-    print("%s TOTAL  \t\tTx_Frames\t\tRx_Frames")
+    print("%s TOTAL  \t\tTx_Frames\t\tRx_Frames"% datetime.now())
     wait_for(lambda:get_flow_statistics(api),10,2)
     
     # dut_link_down(test_const)
     
-    print("%s TOTAL  \t\tTx_Frames\t\tRx_Frames")
+    print("%s TOTAL  \t\tTx_Frames\t\tRx_Frames"% datetime.now())
     wait_for(lambda:get_flow_statistics(api),60,2)
     
-    get_convergence_time(api)
+    get_convergence_time(api,test_const)
 
 
 def create_config(api, test_const):
@@ -152,7 +152,7 @@ def get_convergence_time(api,tc):
     m = api.get_metrics(mr).flow_metrics[0]
     
     convergence = (m.frames_tx - m.frames_rx)/tc["pktRate"]
-    print("%s Convergence time was %i" % (datetime.now(), convergence))
+    print("%s Convergence time was %s" % (datetime.now(), convergence))
 
 def wait_for(func, timeout=30, interval=1):
 
