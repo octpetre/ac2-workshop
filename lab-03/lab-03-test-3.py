@@ -41,11 +41,12 @@ def Test_ibgp_route_prefix():
     start_transmit(api)
     
     watcher = time.time() + 10
-    while 1:
+    while True:
         get_flow_metrics(api)
+        get_port_metrics(api)
         if time.time() > watcher:
             break
-        time.sleep(1)
+        time.sleep(2)
 
     withdraw_routes(api)
 
@@ -200,6 +201,7 @@ def bgp_metrics_ok(api, tc):
 
 def traffic_stopped(api):
     for m in get_flow_metrics(api):
+        get_port_metrics(api)
         if (
             m.transmit != m.STOPPED
         ):
@@ -315,6 +317,49 @@ def get_flow_metrics(api):
                 m.frames_rx_rate,
                 m.bytes_tx,
                 m.bytes_rx,
+            ]
+        )
+    print(tb)
+    return metrics
+
+
+def get_port_metrics(api):
+
+    print("%s Getting port metrics    ..." % datetime.now())
+    req = api.metrics_request()
+    req.port.port_names = []
+
+    metrics = api.get_metrics(req).port_metrics
+
+    tb = Table(
+        "Flow Metrics",
+        [
+            "Name",
+            "State",
+            "Frames Tx",
+            "Frames Rx",
+            "FPS Tx",
+            "FPS Rx",
+            "Bytes Tx",
+            "Bytes Rx",
+            "Bytes Tx Rate",
+            "Bytes Rx Rate",
+        ],
+    )
+
+    for m in metrics:
+        tb.append_row(
+            [
+                m.name,
+                m.transmit,
+                m.frames_tx,
+                m.frames_rx,
+                m.frames_tx_rate,
+                m.frames_rx_rate,
+                m.bytes_tx,
+                m.bytes_rx,
+                m.bytes_tx_rate,
+                m.bytes_rx_rate,
             ]
         )
     print(tb)
