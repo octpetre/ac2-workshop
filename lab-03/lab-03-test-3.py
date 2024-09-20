@@ -34,7 +34,7 @@ def Test_ibgp_route_prefix():
     
     start_protocols(api)
     
-    wait_for(lambda: bgp_metrics_ok(api, test_const),"correct bgp peering")
+    wait_for(lambda: bgp_metrics_ok(api, test_const),"correct bgp peering",2,60)
     
     get_bgp_prefixes(api)
     
@@ -202,9 +202,7 @@ def bgp_metrics_ok(api, tc):
 def traffic_stopped(api):
     for m in get_flow_metrics(api):
         get_port_metrics(api)
-        if (
-            m.transmit != m.STOPPED
-        ):
+        if m.transmit != m.STOPPED:
             return False
     return True
 
@@ -409,7 +407,7 @@ def get_convergence_time(api,tc):
     m = api.get_metrics(mr).flow_metrics[0]
     
     convergence = (m.frames_tx - m.frames_rx)/tc["pktRate"]
-    print("%s Convergence time was %i" % (datetime.now(), convergence))
+    print("%s Convergence time was %ss" % (datetime.now(), convergence))
 
 
 
