@@ -48,7 +48,8 @@ def Test_ibgp_route_prefix():
             break
         time.sleep(2)
 
-    withdraw_routes(api)
+#    withdraw_routes(api)
+    link_down(api)
 
     time.sleep(5)
     
@@ -398,6 +399,16 @@ def withdraw_routes(api):
     cs.protocol.choice = cs.protocol.ROUTE
     cs.protocol.route.names = ["d2_bgpv4_peer_rrv4"]
     cs.protocol.route.state = cs.protocol.route.WITHDRAW
+    api.set_control_state(cs)
+
+
+def link_down(api):
+    print("%s Taking down port 2    ..." % datetime.now())
+    cs = api.control_state()
+    cs.choice = cs.port
+    cs.port.choice = cs.port.LINK
+    cs.port.link.port_names = ["p2"]
+    cs.port.link.state = cs.port.link.DOWN
     api.set_control_state(cs)
 
 
