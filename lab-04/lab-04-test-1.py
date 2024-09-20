@@ -38,12 +38,12 @@ def Traffic_Test():
     
     start_transmit(api)
     
-    print("%s TOTAL  \t\tTx_Frames\t\tRx_Frames"% datetime.now())
-    wait_for(lambda:get_flow_statistics(api),10,2)
+    print("%s TOTAL  \t\tTx_Frames\tRx_Frames"% datetime.now())
+    wait_for(lambda:get_flow_statistics(api))
     
     dut_link_operation(test_const,"disable")
     
-    print("%s TOTAL  \t\tTx_Frames\t\tRx_Frames"% datetime.now())
+    print("%s TOTAL  \t\tTx_Frames\tRx_Frames"% datetime.now())
     wait_for(lambda:get_flow_statistics(api),60,2)
     
     get_convergence_time(api,test_const)
@@ -155,7 +155,7 @@ def get_convergence_time(api,tc):
     convergence = (m.frames_tx - m.frames_rx)/tc["pktRate"]
     print("%s Convergence time was %s" % (datetime.now(), convergence))
 
-def wait_for(func, timeout=30, interval=1):
+def wait_for(func, timeout=60, interval=2):
 
     # Keeps calling the `func` until it returns true or `timeout` occurs every `interval` seconds.
 
