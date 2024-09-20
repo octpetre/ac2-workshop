@@ -41,13 +41,14 @@ def Traffic_Test():
     print("%s TOTAL  \t\tTx_Frames\t\tRx_Frames"% datetime.now())
     wait_for(lambda:get_flow_statistics(api),10,2)
     
-    # dut_link_down(test_const)
+    dut_link_operation(test_const,"disable")
     
     print("%s TOTAL  \t\tTx_Frames\t\tRx_Frames"% datetime.now())
     wait_for(lambda:get_flow_statistics(api),60,2)
     
     get_convergence_time(api,test_const)
-
+    
+    dut_link_operation(test_const,"enable")
 
 def create_config(api, test_const):
         # Configure a new API instance where the location points to controller
@@ -167,12 +168,12 @@ def wait_for(func, timeout=30, interval=1):
 
     return False
 
-def dut_link_down(test_const):
+def dut_link_operation(test_const,state):
     client = SSHClient()
     client.load_host_keys(os.path.expanduser('~')+'/.ssh/known_hosts')
     client.load_system_host_keys
     client.set_missing_host_key_policy(AutoAddPolicy())
-    dutCmd = "sr_cli -ec set interface {} admin-state disable".format(test_const["dutInterface"])
+    dutCmd = "sr_cli -ec set interface {} admin-state {}".format(test_const["dutInterface"],state)
     try:
         client.connect(test_const["dutName"],port=22,username="linuxadmin",password="NokiaSrl1!",timeout=10)
         print("Reseting the DUT %s" %test_const["dutName"])
