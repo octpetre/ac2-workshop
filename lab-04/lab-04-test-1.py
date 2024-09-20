@@ -28,7 +28,7 @@ def Traffic_Test():
         "dutInterface": "ethernet-1/3"
     }
     
-    api = snappi.api(location="https://clab-ixsrl-ixia-c:8443", verify=False)
+    api = snappi.api(location="https://clab-ixsrlx3-ixia-c:8443", verify=False)
 
     create_config(api, test_const)
 
@@ -38,11 +38,13 @@ def Traffic_Test():
     
     start_transmit(api)
     
-    wait_for(get_flow_statistics(api),10,2)
+    print("%s TOTAL  \t\tTx_Frames\t\tRx_Frames")
+    wait_for(lambda:get_flow_statistics(api),10,2)
     
     # dut_link_down(test_const)
     
-    wait_for(get_flow_statistics(api),60,2)
+    print("%s TOTAL  \t\tTx_Frames\t\tRx_Frames")
+    wait_for(lambda:get_flow_statistics(api),60,2)
     
     get_convergence_time(api)
 
@@ -84,7 +86,7 @@ def create_config(api, test_const):
     d2_eth.mac = test_const["2Mac"]
 
     d2_ip = d2_eth.ipv4_addresses.add(name="d2_ip")
-    d2_ip.set(test_const["2Ip"], gateway=test_const["2Gateway"], prefix=test_const["2Prefix"])
+    d2_ip.set(address=test_const["2Ip"], gateway=test_const["2Gateway"], prefix=test_const["2Prefix"])
 
 
     # Configure traffic flow
@@ -132,14 +134,14 @@ def start_transmit(api):
     cs.traffic.flow_transmit.state = cs.traffic.flow_transmit.START
     api.set_control_state(cs)
 
-def get_flow_statistics(api, configuration):
+def get_flow_statistics(api):
 
     # Create a flow statistics request and filter based on flow names
     mr = api.metrics_request()
     mr.flow.flow_names = ["Device 1 > Device 2"]
     m = api.get_metrics(mr).flow_metrics[0]
 
-    print("%s TOTAL  \t\t%d\t\t%d\t\t%d" % (datetime.now(), m.frames_tx, m.frames_rx))
+    print("%s TOTAL  \t\t%d\t\t%d" % (datetime.now(), m.frames_tx, m.frames_rx))
     if m.transmit == m.STOPPED:
         return True
     return False
@@ -155,8 +157,6 @@ def get_convergence_time(api,tc):
 def wait_for(func, timeout=30, interval=1):
 
     # Keeps calling the `func` until it returns true or `timeout` occurs every `interval` seconds.
-
-    import time
 
     start = time.time()
 
