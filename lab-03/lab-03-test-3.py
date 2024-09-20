@@ -6,7 +6,7 @@ import time
    
 def Test_ibgp_route_prefix():
     test_const = {
-        "pktRate": 100,
+        "pktRate": 200,
         "pktCount": 5000,
         "pktSize": 100,
         "bgpAs": 65001,
@@ -58,6 +58,7 @@ def Test_ibgp_route_prefix():
     wait_for(lambda: traffic_stopped(api), "traffic stopped",2,90)
 
     get_convergence_time(api,test_const)
+
 
 def ibgp_route_prefix_config(api, tc):
     c = api.config()
@@ -331,7 +332,7 @@ def get_port_metrics(api):
     metrics = api.get_metrics(req).port_metrics
 
     tb = Table(
-        "Flow Metrics",
+        "Port Metrics",
         [
             "Name",
             "State",
@@ -405,7 +406,7 @@ def withdraw_routes(api):
 def link_down(api):
     print("%s Taking down port 2    ..." % datetime.now())
     cs = api.control_state()
-    cs.choice = cs.port
+    cs.choice = cs.PORT
     cs.port.choice = cs.port.LINK
     cs.port.link.port_names = ["p2"]
     cs.port.link.state = cs.port.link.DOWN
