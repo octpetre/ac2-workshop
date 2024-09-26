@@ -9,7 +9,6 @@ def Test_ibgp_route_prefix():
         "pktRate": 50,
         "pktCount": 1500,
         "pktSize": 128,
-        "trafficDuration": 20,
         "1Mac": "00:00:01:01:01:01",
         "1Ip": "192.168.11.2",
         "1Gateway": "192.168.11.1",

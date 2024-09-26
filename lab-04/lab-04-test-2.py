@@ -6,8 +6,8 @@ import time
    
 def Test_ibgp_route_prefix():
     test_const = {
-        "pktRate": 200,
-        "pktCount": 5000,
+        "pktRate": 1000,
+        "pktCount": 15000,
         "pktSize": 100,
         "bgpAs": 65001,
         "1Mac": "00:00:01:01:01:01",
@@ -24,7 +24,7 @@ def Test_ibgp_route_prefix():
         "3Prefix": 24,
         "routeCount": 5,
         "1AdvRoute": "101.10.10.1",
-        "dstRoute": "201.30.30.1",
+        "startDstRoute": "201.30.30.1",
     }
 
     api = snappi.api(location="https://clab-ixsrl-ixia-c:8443", verify=False)
@@ -40,24 +40,28 @@ def Test_ibgp_route_prefix():
     
     start_transmit(api)
     
-    watcher = time.time() + 10
+    start = time.time()
+
     while True:
         get_flow_metrics(api)
         get_port_metrics(api)
-        if time.time() > watcher:
+        if time.time() - start > (test_const["pktCount"]/test_const["pktRate"])/2:
             break
         time.sleep(2)
 
-#    withdraw_routes(api)
-    link_down(api)
+    # withdraw_routes(api)
+    
+    link_operation(api, "down")
 
-    time.sleep(5)
+    time.sleep(2)
     
     get_bgp_prefixes(api)    
     
     wait_for(lambda: traffic_stopped(api), "traffic stopped",2,90)
 
     get_convergence_time(api,test_const)
+    
+    link_operation(api, "up")
 
 
 def ibgp_route_prefix_config(api, tc):
@@ -127,7 +131,7 @@ def ibgp_route_prefix_config(api, tc):
         next_hop_mode=d2_bgpv4_peer_rrv4.MANUAL,
     )
     d2_bgpv4_peer_rrv4.addresses.add(
-        address=tc["dstRoute"], prefix=32, count=tc["routeCount"], step=1
+        address=tc["startDstRoute"], prefix=32, count=tc["routeCount"], step=1
     )
     d2_bgpv4_peer_rrv4.advanced.set(
         local_preference = 200,
@@ -162,7 +166,7 @@ def ibgp_route_prefix_config(api, tc):
         next_hop_mode=d2_bgpv4_peer_rrv4.MANUAL,
     )
     d3_bgpv4_peer_rrv4.addresses.add(
-        address=tc["dstRoute"], prefix=32, count=tc["routeCount"], step=1
+        address=tc["startDstRoute"], prefix=32, count=tc["routeCount"], step=1
     )
     d3_bgpv4_peer_rrv4.advanced.set(
         local_preference = 150,
@@ -184,7 +188,7 @@ def ibgp_route_prefix_config(api, tc):
     f_eth.src.value = d1_eth.mac
     f_ip.src.increment.start = tc["1AdvRoute"]
     f_ip.src.increment.count = tc["routeCount"]
-    f_ip.dst.increment.start = tc["dstRoute"]
+    f_ip.dst.increment.start = tc["startDstRoute"]
     f_ip.dst.increment.count = tc["routeCount"]
 
     return c
@@ -403,13 +407,16 @@ def withdraw_routes(api):
     api.set_control_state(cs)
 
 
-def link_down(api):
-    print("%s Taking down port 2    ..." % datetime.now())
+def link_operation(api, operation):
+    print("%s Taking %s port 2    ..." % (datetime.now(),operation))
     cs = api.control_state()
     cs.choice = cs.PORT
     cs.port.choice = cs.port.LINK
     cs.port.link.port_names = ["p2"]
-    cs.port.link.state = cs.port.link.DOWN
+    if operation == "down":
+        cs.port.link.state = cs.port.link.DOWN
+    else:
+        cs.port.link.state = cs.port.link.UP
     api.set_control_state(cs)
 
 
