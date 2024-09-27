@@ -7,8 +7,8 @@ import time
 def Test_ebgp_route_prefix():
     # TODO: add support for BGP for IPv6 as well
     test_const = {
-        "pktRate": 50,
-        "pktCount": 1500,
+        "pktRate": 200,
+        "pktCount": 1000,
         "pktSize": 128,
         "trafficDuration": 20,
         "txMac": "00:00:01:01:01:01",
@@ -21,8 +21,8 @@ def Test_ebgp_route_prefix():
         "rxGateway": "1.1.1.1",
         "rxPrefix": 4,
         "rxAs": 1112,
-        "txRouteCount": 1,
-        "rxRouteCount": 1,
+        "txRouteCount": 5,
+        "rxRouteCount": 5,
         "txNextHopV4": "1.1.1.3",
         "txNextHopV6": "::1:1:1:3",
         "rxNextHopV4": "1.1.1.4",
@@ -34,6 +34,7 @@ def Test_ebgp_route_prefix():
     }
 
     api = snappi.api(location="https://localhost:8443", verify=False)
+
     c = ebgp_route_prefix_config(api, test_const)
 
     api.set_config(c)
@@ -44,17 +45,30 @@ def Test_ebgp_route_prefix():
     
     wait_for(lambda: bgp_prefixes_ok(api, test_const),"correct bgp prefixes")
     
+    # start_capture(api)
+    
     start_transmit(api)
     
-    traffic_start_time = int(time.time())
-    
     wait_for(lambda: flow_metrics_ok(api, test_const), "flow metrics",2,90)
+
+    # stop_capture(api)
+    
+    # get_capture(api, "prx", "prx.pcap")
+    # get_capture(api, "ptx", "ptx.pcap")
 
 
 def ebgp_route_prefix_config(api, tc):
     c = api.config()
     ptx = c.ports.add(name="ptx", location="localhost:5551+localhost:50071")
     prx = c.ports.add(name="prx", location="localhost:5552+localhost:50072")
+    
+    # capture configuration
+
+    rx_capture = c.captures.add(name="prx_capture")
+    rx_capture.set(port_names=["prx"],format="pcap",overwrite=True)
+    
+    tx_capture = c.captures.add(name="ptx_capture")
+    tx_capture.set(port_names=["ptx"],format="pcap",overwrite=True)
 
     dtx = c.devices.add(name="dtx")
     drx = c.devices.add(name="drx")
@@ -271,7 +285,6 @@ def ebgp_route_prefix_config(api, tc):
     # print("Config:\n%s", c)
     return c
 
-
 def bgp_metrics_ok(api, tc):
     for m in get_bgpv4_metrics(api):
         if (
@@ -281,7 +294,6 @@ def bgp_metrics_ok(api, tc):
         ):
             return False
     return True
-
 
 def bgp_prefixes_ok(api, tc):
     prefix_count = 0
@@ -303,7 +315,6 @@ def bgp_prefixes_ok(api, tc):
 
     return prefix_count == 4
 
-
 def flow_metrics_ok(api, tc):
     for m in get_flow_metrics(api):
         if (
@@ -313,7 +324,6 @@ def flow_metrics_ok(api, tc):
         ):
             return False
     return True
-
 
 def get_bgpv4_metrics(api):
     print("%s Getting bgpv4 metrics    ..." % datetime.now())
@@ -344,7 +354,6 @@ def get_bgpv4_metrics(api):
 
     print(tb)
     return metrics
-
 
 def get_bgp_prefixes(api):
     print("%s Getting BGP prefixes    ..." % datetime.now())
@@ -389,7 +398,6 @@ def get_bgp_prefixes(api):
     print(tb)
     return bgp_prefixes
 
-
 def get_flow_metrics(api):
 
     print("%s Getting flow metrics    ..." % datetime.now())
@@ -428,7 +436,6 @@ def get_flow_metrics(api):
     print(tb)
     return metrics
 
-
 def start_protocols(api):
     print("%s Starting protocols    ..." % datetime.now())
     cs = api.control_state()
@@ -436,7 +443,6 @@ def start_protocols(api):
     cs.protocol.choice = cs.protocol.ALL
     cs.protocol.all.state = cs.protocol.all.START
     api.set_control_state(cs)
-
 
 def start_transmit(api):
     print("%s Starting transmit on all flows    ..." % datetime.now())
@@ -446,7 +452,6 @@ def start_transmit(api):
     cs.traffic.flow_transmit.state = cs.traffic.flow_transmit.START
     api.set_control_state(cs)
 
-
 def stop_transmit(api):
     print("%s Stopping transmit    ..." % datetime.now())
     cs = api.control_state()
@@ -455,6 +460,29 @@ def stop_transmit(api):
     cs.traffic.flow_transmit.state = cs.traffic.flow_transmit.STOP
     api.set_control_state(cs)
 
+def start_capture(api):
+    print("%s Starting capture  ..." % datetime.now())
+    cs = api.control_state()
+    cs.choice = cs.PORT
+    cs.port.choice = cs.port.CAPTURE
+    cs.port.capture.set(port_names = [], state="start")
+    api.set_control_state(cs)
+
+def stop_capture(api):
+    print("%s Stopping capture  ..." % datetime.now())
+    cs = api.control_state()
+    cs.choice = cs.PORT
+    cs.port.choice = cs.port.CAPTURE
+    cs.port.capture.set(port_names = [], state="stop")
+    api.set_control_state(cs)
+
+def get_capture(api,port_name,file_name):
+    print('Fetching capture from port %s' % port_name)
+    capture_req = api.capture_request()
+    capture_req.port_name = port_name
+    pcap = api.get_capture(capture_req)
+    with open(file_name, 'wb') as out:
+        out.write(pcap.read())
 
 def wait_for(func, condition_str, interval_seconds=None, timeout_seconds=None):
     """
