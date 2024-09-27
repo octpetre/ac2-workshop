@@ -27,7 +27,7 @@ def Test_ibgp_route_prefix():
         "startDstRoute": "201.30.30.1",
     }
 
-    api = snappi.api(location="https://clab-ixsrl-ixia-c:8443", verify=False)
+    api = snappi.api(location="https://clab-lab-04-ixia-c:8443", verify=False)
     c = ibgp_route_prefix_config(api, test_const)
 
     api.set_config(c)
@@ -408,7 +408,7 @@ def withdraw_routes(api):
 
 
 def link_operation(api, operation):
-    print("%s Taking %s port 2    ..." % (datetime.now(),operation))
+    print("%s Bringing %s port 2    ..." % (datetime.now(),operation))
     cs = api.control_state()
     cs.choice = cs.PORT
     cs.port.choice = cs.port.LINK

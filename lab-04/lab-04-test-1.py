@@ -24,7 +24,7 @@ def Test_ibgp_route_prefix():
         "2AdvRoute": "201.20.20.1",
     }
 
-    api = snappi.api(location="https://clab-ixsrl-ixia-c:8443", verify=False)
+    api = snappi.api(location="https://clab-lab-04-ixia-c:8443", verify=False)
     c = ibgp_route_prefix_config(api, test_const)
 
     api.set_config(c)

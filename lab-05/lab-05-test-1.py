@@ -28,7 +28,7 @@ def Traffic_Test():
         "dutInterface": "ethernet-1/3"
     }
     
-    api = snappi.api(location="https://clab-ixsrlx3-ixia-c:8443", verify=False)
+    api = snappi.api(location="https://clab-lab-05-ixia-c:8443", verify=False)
 
     create_config(api, test_const)
 
