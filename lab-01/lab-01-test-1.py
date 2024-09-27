@@ -60,9 +60,11 @@ def Traffic_Test():
         f.rate.pps = 100
 
     # Configure packet with Ethernet, IPv4, and UDP headers for both flows
-    flow1.packet.ethernet().ipv4().udp()
+    eth1 = flow1.packet.add().ethernet
+    ip1 = flow1.packet.add().ipv4
+    udp1 = flow1.packet.add().udp
+
     flow2.packet.ethernet().ipv4().udp()
-    eth1, ip1, udp1 = flow1.packet[0], flow1.packet[1], flow1.packet[2]
     eth2, ip2, udp2 = flow2.packet[0], flow2.packet[1], flow2.packet[2]
 
     # Configure source and destination MAC addresses
