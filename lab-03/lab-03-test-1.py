@@ -19,6 +19,7 @@ def Test_ibgp_route_prefix():
     }
 
     api = snappi.api(location="https://clab-lab-03-ixia-c:8443", verify=False)
+    
     c = ibgp_route_prefix_config(api, test_const)
 
     api.set_config(c)
@@ -31,6 +32,7 @@ def Test_ibgp_route_prefix():
 
 def ibgp_route_prefix_config(api, tc):
     c = api.config()
+
     p1 = c.ports.add(name="p1", location="eth1")
     p2 = c.ports.add(name="p2", location="eth2")
 
@@ -74,10 +76,18 @@ def ibgp_route_prefix_config(api, tc):
         tx_names=[d1_ip.name], rx_names=rx_endpoints
     )
 
-    f_eth, f_ip = f.packet.ethernet().ipv4()
+    f_eth = f.packet.add().ethernet
+    f_ip = f.packet.add().ipv4
     f_eth.src.value = d1_eth.mac
     f_ip.src.value = tc["1Ip"]
     f_ip.dst.increment.set(start = tc["2IpStart"], step = "0.0.1.0", count = tc["2SubnetCount"])
+    f_ip.priority.dscp.phb.values = [10,20,30]
+    
+    f.egress_packet.ethernet()
+    eg_vlan = f.egress_packet.add().vlan
+    # eg_vlan.id.metric_tags.add(name="vladIdRx")
+    eg_ip = f.egress_packet.add().ipv4
+    eg_ip.priority.raw.metric_tags.add(name="dscpValuesRx", length=6)
 
     return c
 
@@ -99,8 +109,7 @@ def get_flow_metrics(api):
     req.flow.flow_names = []
 
     metrics = api.get_metrics(req).flow_metrics
-
-    tb = Table(
+    tb_flow = Table(
         "Flow Metrics",
         [
             "Name",
@@ -115,7 +124,7 @@ def get_flow_metrics(api):
     )
 
     for m in metrics:
-        tb.append_row(
+        tb_flow.append_row(
             [
                 m.name,
                 m.transmit,
@@ -127,7 +136,30 @@ def get_flow_metrics(api):
                 m.bytes_rx,
             ]
         )
-    print(tb)
+        if len(m.tagged_metrics) > 0:
+            tb_tags = Table(
+                "Tagged Metrics",
+                [
+                    "DscpValue",
+                    "Frames Rx",
+                    "FPS Rx",
+                    "Bytes Rx",
+                ],
+            )
+            for t in m.tagged_metrics:
+                dscpValue=int(t.tags[0].value.hex,16)
+                # dscpValue=t.tags[0].value.hex
+                tb_tags.append_row(
+                    [
+                        dscpValue,
+                        t.frames_rx,
+                        t.frames_rx_rate,
+                        t.bytes_rx,
+                    ]
+                )
+    print(tb_flow)
+    if 'tb_tags' in locals(): 
+        print(tb_tags)
     return metrics
 
 def start_protocols(api):
