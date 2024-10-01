@@ -85,9 +85,9 @@ def ibgp_route_prefix_config(api, tc):
     
     f.egress_packet.ethernet()
     eg_vlan = f.egress_packet.add().vlan
-    # eg_vlan.id.metric_tags.add(name="vladIdRx")
-    eg_ip = f.egress_packet.add().ipv4
-    eg_ip.priority.raw.metric_tags.add(name="dscpValuesRx", length=6)
+    eg_vlan.id.metric_tags.add(name="vladIdRx")
+    # eg_ip = f.egress_packet.add().ipv4
+    # eg_ip.priority.raw.metric_tags.add(name="dscpValuesRx", length=6)
 
     return c
 
@@ -140,18 +140,20 @@ def get_flow_metrics(api):
             tb_tags = Table(
                 "Tagged Metrics",
                 [
-                    "DscpValue",
+                    # "DscpValue",
+                    "Vlan Id",
                     "Frames Rx",
                     "FPS Rx",
                     "Bytes Rx",
                 ],
             )
             for t in m.tagged_metrics:
-                dscpValue=int(t.tags[0].value.hex,16)
-                # dscpValue=t.tags[0].value.hex
+                # dscp=int(t.tags[0].value.hex,16)
+                vlanId=t.tags[0].value.hex
                 tb_tags.append_row(
                     [
-                        dscpValue,
+                        # dscp,
+                        vlanId,
                         t.frames_rx,
                         t.frames_rx_rate,
                         t.bytes_rx,
