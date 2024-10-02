@@ -15,7 +15,7 @@ def Test_ibgp_route_prefix():
         "1Prefix": 24,
         "2VlanStart": 101,
         "2IpStart": "192.168.101.2",
-        "2SubnetCount": 3
+        "2SubnetCount": 1
     }
 
     api = snappi.api(location="https://clab-lab-03-ixia-c:8443", verify=False)
@@ -81,7 +81,7 @@ def ibgp_route_prefix_config(api, tc):
     f_eth.src.value = d1_eth.mac
     f_ip.src.value = tc["1Ip"]
     f_ip.dst.increment.set(start = tc["2IpStart"], step = "0.0.1.0", count = tc["2SubnetCount"])
-    f_ip.priority.dscp.phb.values = [10,20,30]
+    f_ip.priority.dscp.phb.values = [10,12, 14, 20, 22,30, 34]
     
     f.egress_packet.ethernet()
     eg_vlan = f.egress_packet.add().vlan
