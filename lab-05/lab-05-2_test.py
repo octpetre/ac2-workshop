@@ -5,8 +5,10 @@ import time
 
    
 def Test_ebgp_route_prefix():
-    # TODO: add support for BGP for IPv6 as well
     test_const = {
+        "controller_location": "https://172.18.0.63:8443",
+        "p1_location": "eth1",
+        "p2_location": "eth2",
         "pktRate": 200,
         "pktCount": 1000,
         "pktSize": 128,
@@ -33,7 +35,7 @@ def Test_ebgp_route_prefix():
         "rxAdvRouteV6": "::20:20:20:1",
     }
 
-    api = snappi.api(location="https://localhost:8443", verify=False)
+    api = snappi.api(location=test_const["controller_location"], verify=False)
 
     c = ebgp_route_prefix_config(api, test_const)
 
@@ -59,8 +61,8 @@ def Test_ebgp_route_prefix():
 
 def ebgp_route_prefix_config(api, tc):
     c = api.config()
-    ptx = c.ports.add(name="ptx", location="localhost:5551+localhost:50071")
-    prx = c.ports.add(name="prx", location="localhost:5552+localhost:50072")
+    ptx = c.ports.add(name="ptx", location=tc["port1_location"])
+    prx = c.ports.add(name="prx", location=tc["port2_location"])
     
     # capture configuration
 

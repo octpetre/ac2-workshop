@@ -16,7 +16,7 @@ def Traffic_Test():
     # TRex:         location =         "<tgen-ip>:<port>", ext="trex"
 
     print("")
-    api = snappi.api(location="https://127.0.0.1:8443", verify=False)
+    api = snappi.api(location="https://172.18.0.63:8443", verify=False)
     print("%s Starting connection to controller                     ... " % datetime.now())
 
     # Create an empty configuration to be pushed to controller
@@ -29,8 +29,8 @@ def Traffic_Test():
 
     port1, port2 = (
         configuration.ports
-        .port(name="Port-1", location="127.0.0.1:5551")
-        .port(name="Port-2", location="127.0.0.1:5552")
+        .port(name="Port-1", location="eth1")
+        .port(name="Port-2", location="eth2")
     )
 
     # Configure two traffic flows
