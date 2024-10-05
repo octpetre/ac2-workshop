@@ -23,8 +23,8 @@ def Test_ebgp_route_prefix():
         "rxGateway": "1.1.1.1",
         "rxPrefix": 4,
         "rxAs": 1112,
-        "txRouteCount": 5,
-        "rxRouteCount": 5,
+        "txRouteCount": 10,
+        "rxRouteCount": 10,
         "txNextHopV4": "1.1.1.3",
         "txNextHopV6": "::1:1:1:3",
         "rxNextHopV4": "1.1.1.4",
@@ -61,8 +61,8 @@ def Test_ebgp_route_prefix():
 
 def ebgp_route_prefix_config(api, tc):
     c = api.config()
-    ptx = c.ports.add(name="ptx", location=tc["port1_location"])
-    prx = c.ports.add(name="prx", location=tc["port2_location"])
+    ptx = c.ports.add(name="ptx", location=tc["p1_location"])
+    prx = c.ports.add(name="prx", location=tc["p2_location"])
     
     # capture configuration
 

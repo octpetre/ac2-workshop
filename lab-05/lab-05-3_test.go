@@ -13,38 +13,39 @@ import (
 func TestEbgpRoutePrefix(t *testing.T) {
 
 	testConst := map[string]interface{}{
-		"controller_location": "172.18.0.62:40051",
-		"p1_location":         "eth1",
-		"p2_location":         "eth2",
-		"pktRate":             uint64(50),
-		"pktCount":            uint32(100),
-		"pktSize":             uint32(128),
-		"txMac":               "00:00:01:01:01:01",
-		"txIp":                "1.1.1.1",
-		"txGateway":           "1.1.1.2",
-		"txPrefix":            uint32(24),
-		"txAs":                uint32(1111),
-		"rxMac":               "00:00:01:01:01:02",
-		"rxIp":                "1.1.1.2",
-		"rxGateway":           "1.1.1.1",
-		"rxPrefix":            uint32(24),
-		"rxAs":                uint32(1112),
-		"txRouteCount":        uint32(1),
-		"rxRouteCount":        uint32(1),
-		"txNextHopV4":         "1.1.1.3",
-		"txNextHopV6":         "::1:1:1:3",
-		"rxNextHopV4":         "1.1.1.4",
-		"rxNextHopV6":         "::1:1:1:4",
-		"txAdvRouteV4":        "10.10.10.1",
-		"rxAdvRouteV4":        "20.20.20.1",
-		"txAdvRouteV6":        "::10:10:10:1",
-		"rxAdvRouteV6":        "::20:20:20:1",
+		"controller_location": "https://172.18.0.63:8443",
+		// "controller_location": "172.18.0.62:40051",
+		"p1_location":  "eth1",
+		"p2_location":  "eth2",
+		"pktRate":      uint64(200),
+		"pktCount":     uint32(12000),
+		"pktSize":      uint32(128),
+		"txMac":        "00:00:01:01:01:01",
+		"txIp":         "1.1.1.1",
+		"txGateway":    "1.1.1.2",
+		"txPrefix":     uint32(24),
+		"txAs":         uint32(1111),
+		"rxMac":        "00:00:01:01:01:02",
+		"rxIp":         "1.1.1.2",
+		"rxGateway":    "1.1.1.1",
+		"rxPrefix":     uint32(24),
+		"rxAs":         uint32(1112),
+		"txRouteCount": uint32(1),
+		"rxRouteCount": uint32(1),
+		"txNextHopV4":  "1.1.1.3",
+		"txNextHopV6":  "::1:1:1:3",
+		"rxNextHopV4":  "1.1.1.4",
+		"rxNextHopV6":  "::1:1:1:4",
+		"txAdvRouteV4": "10.10.10.1",
+		"rxAdvRouteV4": "20.20.20.1",
+		"txAdvRouteV6": "::10:10:10:1",
+		"rxAdvRouteV6": "::20:20:20:1",
 	}
 
 	api := gosnappi.NewApi()
 
-	// api.NewHttpTransport().SetLocation("https://172.18.0.63:8443")
-	api.NewGrpcTransport().SetLocation(testConst["controller_location"].(string))
+	api.NewHttpTransport().SetLocation(testConst["controller_location"].(string))
+	// api.NewGrpcTransport().SetLocation(testConst["controller_location"].(string))
 
 	c := ebgpRoutePrefixConfig(testConst)
 
@@ -54,21 +55,21 @@ func TestEbgpRoutePrefix(t *testing.T) {
 
 	/* Check if BGP sessions are up and expected routes are Txed and Rxed */
 	waitFor(t,
-		func() bool { return ebgpRoutePrefixBgpMetricsOk(t, api, testConst) },
+		func() bool { return bgpMetricsOk(t, api, testConst) },
 		waitForOpts{FnName: "waiting for bgp neighbours", Interval: 2 * time.Second, Timeout: 30 * time.Second},
 	)
 
 	/* Check if each BGP session recieved routes with expected attributes */
 	waitFor(t,
-		func() bool { return ebgpRoutePrefixBgpPrefixesOk(t, api, testConst) },
+		func() bool { return bgpPrefixesOk(t, api, testConst) },
 		waitForOpts{FnName: "wait for bgp route prefixes", Interval: 2 * time.Second, Timeout: 30 * time.Second},
 	)
 
 	startTransmit(t, api)
 
 	waitFor(t,
-		func() bool { return ebgpRoutePrefixFlowMetricsOk(t, api, testConst) },
-		waitForOpts{FnName: "wait for flow metrics", Interval: 1 * time.Second, Timeout: 30 * time.Second},
+		func() bool { return flowMetricsOk(t, api, testConst) },
+		waitForOpts{FnName: "wait for flow metrics", Interval: 2 * time.Second, Timeout: 90 * time.Second},
 	)
 }
 
@@ -353,7 +354,7 @@ func ebgpRoutePrefixConfig(tc map[string]interface{}) gosnappi.Config {
 	return c
 }
 
-func ebgpRoutePrefixBgpMetricsOk(t *testing.T, api gosnappi.Api, tc map[string]interface{}) bool {
+func bgpMetricsOk(t *testing.T, api gosnappi.Api, tc map[string]interface{}) bool {
 	for _, m := range getBgpv4Metrics(t, api) {
 		if m.SessionState() == gosnappi.Bgpv4MetricSessionState.DOWN ||
 			m.RoutesAdvertised() != 2*uint64(tc["txRouteCount"].(uint32)) ||
@@ -364,7 +365,7 @@ func ebgpRoutePrefixBgpMetricsOk(t *testing.T, api gosnappi.Api, tc map[string]i
 	return true
 }
 
-func ebgpRoutePrefixBgpPrefixesOk(t *testing.T, api gosnappi.Api, tc map[string]interface{}) bool {
+func bgpPrefixesOk(t *testing.T, api gosnappi.Api, tc map[string]interface{}) bool {
 	prefixCount := 0
 	for _, m := range getBgpPrefixes(t, api) {
 		for _, p := range m.Ipv4UnicastPrefixes().Items() {
@@ -385,7 +386,7 @@ func ebgpRoutePrefixBgpPrefixesOk(t *testing.T, api gosnappi.Api, tc map[string]
 	return prefixCount == 4
 }
 
-func ebgpRoutePrefixFlowMetricsOk(t *testing.T, api gosnappi.Api, tc map[string]interface{}) bool {
+func flowMetricsOk(t *testing.T, api gosnappi.Api, tc map[string]interface{}) bool {
 	pktCount := uint64(tc["pktCount"].(uint32))
 
 	for _, m := range getFlowMetrics(t, api) {
