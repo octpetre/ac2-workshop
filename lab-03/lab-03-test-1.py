@@ -15,7 +15,7 @@ def Test_ibgp_route_prefix():
         "1Prefix": 24,
         "2VlanStart": 101,
         "2IpStart": "192.168.101.2",
-        "2SubnetCount": 1
+        "2SubnetCount": 3
     }
 
     api = snappi.api(location="https://clab-lab-03-ixia-c:8443", verify=False)
@@ -81,13 +81,14 @@ def ibgp_route_prefix_config(api, tc):
     f_eth.src.value = d1_eth.mac
     f_ip.src.value = tc["1Ip"]
     f_ip.dst.increment.set(start = tc["2IpStart"], step = "0.0.1.0", count = tc["2SubnetCount"])
-    f_ip.priority.dscp.phb.values = [10,12, 14, 20, 22,30, 34]
+    f_ip.priority.dscp.phb.values = [10, 14, 22, 24]
     
     f.egress_packet.ethernet()
     eg_vlan = f.egress_packet.add().vlan
-    # eg_vlan.id.metric_tags.add(name="vladIdRx")
     eg_ip = f.egress_packet.add().ipv4
-    eg_ip.priority.raw.metric_tags.add(name="dscpValuesRx", length=6)
+
+    eg_vlan.id.metric_tags.add(name="vlanIdRx")
+    # eg_ip.priority.raw.metric_tags.add(name="dscpValuesRx", length=6)
 
     return c
 
@@ -140,20 +141,18 @@ def get_flow_metrics(api):
             tb_tags = Table(
                 "Tagged Metrics",
                 [
-                    "DscpValue",
-                    # "Vlan Id",
+                    "Tracked Value",
                     "Frames Rx",
                     "FPS Rx",
                     "Bytes Rx",
                 ],
             )
             for t in m.tagged_metrics:
-                dscp=int(t.tags[0].value.hex,16)
-                # vlanId=t.tags[0].value.hex
+                # metric=int(t.tags[0].value.hex,16)
+                metric=t.tags[0].value.hex
                 tb_tags.append_row(
                     [
-                        dscp,
-                        # vlanId,
+                        metric,
                         t.frames_rx,
                         t.frames_rx_rate,
                         t.bytes_rx,
