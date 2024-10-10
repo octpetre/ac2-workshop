@@ -20,7 +20,7 @@ def Test_ibgp_route_prefix():
 
     api = snappi.api(location="https://clab-lab-03-ixia-c:8443", verify=False)
     
-    c = ibgp_route_prefix_config(api, test_const)
+    c = otg_config(api, test_const)
 
     api.set_config(c)
     
@@ -30,7 +30,7 @@ def Test_ibgp_route_prefix():
     
     wait_for(lambda: flow_metrics_ok(api, test_const), "flow metrics",2,90)
 
-def ibgp_route_prefix_config(api, tc):
+def otg_config(api, tc):
     c = api.config()
 
     p1 = c.ports.add(name="p1", location="eth1")
