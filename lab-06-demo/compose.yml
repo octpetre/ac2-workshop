@@ -1,0 +1,60 @@
+version: "2"
+services:
+  controller:
+    image: ghcr.io/open-traffic-generator/keng-controller:1.13.0-9
+    restart: always
+    depends_on:
+      layer23-hw-server:
+        condition: service_started
+    command:
+      - "--accept-eula"
+      - "--debug"
+      - "--keng-layer23-hw-server"
+      - "layer23-hw-server:5001"
+    environment:
+      - LICENSE_SERVERS=10.24.50.115
+    ports:
+      - "8443:8443"
+      - "40051:40051"
+    logging:
+      driver: "local"
+      options:
+        max-size: "100m"
+        max-file: "10"
+        mode: "non-blocking"
+  layer23-hw-server:
+    image: ghcr.io/open-traffic-generator/keng-layer23-hw-server:1.13.0-5
+    restart: always
+    command:
+      - "dotnet"
+      - "otg-ixhw.dll"
+      - "--trace"
+      - "--log-level"
+      - "trace"
+    ports:
+      - "5000:5000"
+      - "5001:5001"
+    logging:
+      driver: "local"
+      options:
+        max-size: "100m"
+        max-file: "10"
+        mode: "non-blocking"
+  gnmi-server:
+    image: ghcr.io/open-traffic-generator/otg-gnmi-server:1.14.14
+    restart: always
+    depends_on:
+      controller:
+        condition: service_started
+    command:
+      - "-http-server"
+      - "https://controller:8443"
+      - "--debug"
+    ports:
+      - "50051:50051"
+    logging:
+      driver: "local"
+      options:
+        max-size: "100m"
+        max-file: "10"
+        mode: "non-blocking"
