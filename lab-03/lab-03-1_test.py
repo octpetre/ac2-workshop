@@ -18,7 +18,7 @@ def Test_ibgp_route_prefix():
         "2SubnetCount": 3
     }
 
-    api = snappi.api(location="https://clab-lab-03-ixia-c:8443", verify=False)
+    api = snappi.api(location="https://clab-lab-03-controller:8443", verify=False)
     
     c = otg_config(api, test_const)
 
@@ -33,8 +33,8 @@ def Test_ibgp_route_prefix():
 def otg_config(api, tc):
     c = api.config()
 
-    p1 = c.ports.add(name="p1", location="eth1")
-    p2 = c.ports.add(name="p2", location="eth2")
+    p1 = c.ports.add(name="p1", location="clab-lab-03-te1:5551+clab-lab-03-te1:50071")
+    p2 = c.ports.add(name="p2", location="clab-lab-03-te2:5552+clab-lab-03-te2:50071")
 
     d1 = c.devices.add(name="d1")
     d2 = c.devices.add(name="d2")
