@@ -6,9 +6,11 @@ import time
    
 def Test_ibgp_route_prefix():
     test_const = {
-        "pktRate": 1000,
-        "pktCount": 15000,
-        "pktSize": 100,
+        # "pktRate": 100,
+        # "pktCount": 15000,
+        "lineRatePercentage": 100,
+        "trafficDuration": 60,
+        "pktSize": 1500,
         "bgpAs": 65001,
         "1Mac": "00:00:01:01:01:01",
         "1Ip": "192.168.11.2",
@@ -45,10 +47,12 @@ def Test_ibgp_route_prefix():
     while True:
         get_flow_metrics(api)
         get_port_metrics(api)
-        if time.time() - start > (test_const["pktCount"]/test_const["pktRate"])/2:
+        if time.time() - start > (test_const["trafficDuration"]/2):
             break
         time.sleep(2)
 
+    packet_rate = get_packet_rate(api)
+    
     withdraw_routes(api)
     
     # link_operation(api, "down")
@@ -59,7 +63,7 @@ def Test_ibgp_route_prefix():
     
     wait_for(lambda: traffic_stopped(api), "traffic stopped",2,90)
 
-    get_convergence_time(api,test_const)
+    get_convergence_time(api,packet_rate)
     
     # link_operation(api, "up")
 
@@ -174,8 +178,8 @@ def ibgp_route_prefix_config(api, tc):
     )
     
     f = c.flows.add()
-    f.duration.fixed_packets.packets = tc["pktCount"]
-    f.rate.pps = tc["pktRate"]
+    f.duration.fixed_seconds.seconds = tc["trafficDuration"]
+    f.rate.percentage = tc["lineRatePercentage"]
     f.size.fixed = tc["pktSize"]
     f.metrics.enable = True
 
@@ -420,12 +424,21 @@ def link_operation(api, operation):
     api.set_control_state(cs)
 
 
-def get_convergence_time(api,tc):
+def get_packet_rate(api):
+    mr = api.metrics_request()
+    mr.flow.flow_names = ["bgpFlow"]
+    m = api.get_metrics(mr).flow_metrics[0]
+    packet_rate = m.frames_tx_rate
+    print("%s Tx Packet rate is %i" % (datetime.now(),packet_rate))
+    return packet_rate
+
+
+def get_convergence_time(api,packet_rate):
     mr = api.metrics_request()
     mr.flow.flow_names = ["bgpFlow"]
     m = api.get_metrics(mr).flow_metrics[0]
     
-    convergence = (m.frames_tx - m.frames_rx)/tc["pktRate"]
+    convergence = (m.frames_tx - m.frames_rx)/packet_rate
     print("%s Convergence time was %ss" % (datetime.now(), convergence))
 
 
