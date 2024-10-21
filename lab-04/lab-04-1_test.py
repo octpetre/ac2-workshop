@@ -134,8 +134,8 @@ def ibgp_route_prefix_config(api, tc):
         address=tc["startDstRoute"], prefix=32, count=tc["routeCount"], step=1
     )
     d2_bgpv4_peer_rrv4.advanced.set(
-        local_preference = 200,
-        multi_exit_discriminator = 100
+        local_preference = 300,
+        multi_exit_discriminator = 300
     )
     
     d3_eth = d3.ethernets.add(name="d3_eth")
@@ -169,8 +169,8 @@ def ibgp_route_prefix_config(api, tc):
         address=tc["startDstRoute"], prefix=32, count=tc["routeCount"], step=1
     )
     d3_bgpv4_peer_rrv4.advanced.set(
-        local_preference = 150,
-        multi_exit_discriminator = 200
+        local_preference = 300,
+        multi_exit_discriminator = 300
     )
     
     f = c.flows.add()
