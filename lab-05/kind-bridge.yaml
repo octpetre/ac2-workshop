@@ -7,7 +7,7 @@ cluster:
     name: kne
     recycle: True
     version: v0.17.0
-    image: kindest/node:v1.26.0
+    image: kindest/node:v1.31.0
     config: /home/ubuntu/kne/manifests/kind/config.yaml
     additionalManifests:
       - /home/ubuntu/kne/manifests/kind/bridge.yaml
